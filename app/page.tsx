@@ -1,5 +1,5 @@
-import { AdminDashboard } from "@/components/admin-dashboard"
+import { ModaFitStore } from "@/components/moda-fit-store"
 
 export default function Page() {
-  return <AdminDashboard />
+  return <ModaFitStore />
 }
