@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
+import { ToastProvider } from "@/components/ui/use-toast"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -19,15 +20,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="es">
       <body className={`${poppins.variable} font-sans antialiased`}>
-        {children}
-        <Toaster />  {/* Sonner solo requiere esto */}
-        <Analytics />
+        {/* 🔥 Ahora SÍ todo está dentro del ToastProvider */}
+        <ToastProvider>
+          {children}
+          <Toaster />
+          <Analytics />
+        </ToastProvider>
       </body>
     </html>
   )

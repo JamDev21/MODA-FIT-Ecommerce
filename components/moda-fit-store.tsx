@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Search, ShoppingCart, User, Heart, Facebook, Instagram, Twitter, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import Link from "next/link";
 
 
 interface Product {
@@ -100,9 +101,9 @@ export function ModaFitStore() {
             <a href="#" className="text-white hover:text-[#f7b6c2] transition-colors text-sm">
               Accessories
             </a>
-            <a href="#" className="text-white hover:text-[#f7b6c2] transition-colors text-sm">
-              Sale
-            </a>
+            <Link href="/admin-login" className="text-white hover:text-[#f7b6c2] transition-colors text-sm">
+              Admin
+            </Link>
           </nav>
 
           {/* Action Icons */}
@@ -145,7 +146,7 @@ export function ModaFitStore() {
                 onClick={() => handleAddToCart(0)}
                 className="bg-[#f7b6c2] hover:bg-[#f7b6c2]/90 text-white font-semibold px-8 py-6 text-base"
               >
-                Añadir
+                Iniciar sesión 
               </Button>
             </div>
 
