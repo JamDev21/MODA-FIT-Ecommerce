@@ -88,7 +88,9 @@ export function ModaFitStore() {
             <div className="space-y-6">
                 <h1 className="text-5xl md:text-6xl font-bold text-[#f7b6c2] leading-[1.1]">MODA FIT</h1>
               <p className="text-white text-base md:text-lg max-w-sm leading-snug">
-                Ropa deportiva premium: cómoda, resistente y diseñada para tu rendimiento.                                                                      
+                Ropa deportiva premium: cómoda, resistente y diseñada para tu rendimiento.
+              </p>
+              <p className="text-white text-base md:text-lg max-w-sm leading-snug">
                 Viste MODA, Viste FIT
               </p>
               <Button
