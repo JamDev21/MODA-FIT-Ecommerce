@@ -5,76 +5,25 @@ import { Search, ShoppingCart, User, Heart, Facebook, Instagram, Twitter, Messag
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import Link from "next/link";
-
-
-interface Product {
-  id: number
-  name: string
-  price: number
-  imageUrl: string
-  isFavorite: boolean
-}
+import { getProducts, Product } from "@/lib/products"
 
 export function ModaFitStore() {
-  //const { toast } = useToast()
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Sculpt Leggings",
-      price: 25.99,
-      imageUrl: "./images/black-athletic-leggings.jpg",
-      isFavorite: false,
-    },
-    {
-      id: 2,
-      name: "Sculpt Leggings",
-      price: 25.99,
-      imageUrl: "./images/black-high-waist-leggings.jpg",
-      isFavorite: false,
-    },
-    {
-      id: 3,
-      name: "Stride Sports Bra",
-      price: 16.99,
-      imageUrl: "./images/pink-sports-bra.jpg",
-      isFavorite: false,
-    },
-    {
-      id: 4,
-      name: "Active Short Set",
-      price: 24.99,
-      imageUrl: "./images/pink-top-black-shorts-set.jpg",
-      isFavorite: false,
-    },
-    {
-      id: 5,
-      name: "Sculpt",
-      price: 19.99,
-      imageUrl: "./images/black-crop-top-leggings.jpg",
-      isFavorite: false,
-    },
-    {
-      id: 6,
-      name: "Flow Tank Top",
-      price: 24.99,
-      imageUrl: "./images/pink-tank-top-athletic.jpg",
-      isFavorite: false,
-    },
-  ])
-
+  const products = getProducts()
   const [cartCount, setCartCount] = useState(2)
 
-  const handleAddToCart = (productId: number) => {
-  toast.success("Producto añadido", {
-    description: "Se agregó al carrito correctamente.",
-  })
-}
+  const handleAddToCart = (e: React.MouseEvent, productName: string) => {
+    e.preventDefault() 
+    e.stopPropagation(); 
+    toast.success("Producto añadido", {
+      description: `${productName} se agregó al carrito.`,
+    })
+    setCartCount(prev => prev + 1)
+  }
 
-
-  const toggleFavorite = (productId: number) => {
-    setProducts(
-      products.map((product) => (product.id === productId ? { ...product, isFavorite: !product.isFavorite } : product)),
-    )
+  const toggleFavorite = (e: React.MouseEvent, productId: number) => {
+    e.preventDefault() 
+    e.stopPropagation();
+    toast.info("Producto añadido a favoritos")
   }
 
   return (
@@ -143,7 +92,7 @@ export function ModaFitStore() {
                 Viste MODA, Viste FIT
               </p>
               <Button
-                onClick={() => handleAddToCart(0)}
+                //onClick={(e) => handleAddToCart(e, product.name)}
                 className="bg-[#f7b6c2] hover:bg-[#f7b6c2]/90 text-white font-semibold px-8 py-6 text-base"
               >
                 Iniciar sesión 
@@ -170,25 +119,31 @@ export function ModaFitStore() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
             {products.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden group">
+              
+              <Link
+                href={`/producto/${product.id}`}
+                key={product.id}
+                className="bg-white rounded-lg shadow-md overflow-hidden group block"
+              >
                 {/* Product Image Container */}
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                   <img
-                    src={product.imageUrl || "/placeholder.svg"}
+                    
+                    src={product.images[0] || "/placeholder.svg"}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {/* Favorite Button */}
                   <button
-                    onClick={() => toggleFavorite(product.id)}
-                    className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                      product.isFavorite
-                        ? "bg-[#f7b6c2] text-white"
-                        : "bg-white/80 text-gray-600 hover:bg-[#f7b6c2] hover:text-white"
-                    }`}
+                    
+                    onClick={(e) => toggleFavorite(e, product.id)}
+                    
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors bg-white/80 text-gray-600 hover:bg-[#f7b6c2] hover:text-white"
                   >
-                    <Heart className={`h-4 w-4 ${product.isFavorite ? "fill-current" : ""}`} />
+                   
+                    <Heart className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -197,13 +152,13 @@ export function ModaFitStore() {
                   <h3 className="font-semibold text-[#222] text-base">{product.name}</h3>
                   <p className="text-xl font-bold text-[#222]">${product.price.toFixed(2)}</p>
                   <Button
-                    onClick={() => handleAddToCart(product.id)}
+                    onClick={(e) => handleAddToCart(e, product.name)}
                     className="w-full bg-[#222] hover:bg-[#222]/90 text-white font-medium py-2 transition-all hover:shadow-lg"
                   >
                     Añadir
                   </Button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
