@@ -5,18 +5,19 @@ import { Heart, ChevronDown, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner' 
-import { Product, getRelatedProducts } from '@/lib/products' 
+// import { Product, getRelatedProducts } from '@/lib/products' 
+import { Product } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 // Define la prop que recibirá el componente
 interface ProductDetailProps {
   product: Product;
+  relatedProducts: Product[];
 }
 
 // Acepta 'product' como prop
-export function ProductDetail({ product }: ProductDetailProps) {
-  
+export function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   // Usa los datos del producto
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'M')
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || 'default')
@@ -28,7 +29,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const colors = product.colors;
   
   // Obtén productos relacionados dinámicamente
-  const relatedProducts = getRelatedProducts(product.id, product.category);
 
   const handleAddToCart = () => {
    const colorLabel = colors.find(c => c.name === selectedColor)?.label || ''

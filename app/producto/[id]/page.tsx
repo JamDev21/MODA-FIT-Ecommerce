@@ -1,39 +1,28 @@
-// app/producto/[id]/page.tsx
-'use client' 
-
-import { useParams, notFound } from 'next/navigation' 
-import { getProductById } from '@/lib/products'
+import { getProductById, getRelatedProducts } from '@/lib/products'
 import { ProductDetail } from '@/components/product-detail'
-import { useEffect, useState } from 'react' 
+import { notFound } from 'next/navigation'
 
-// Un tipo simple para el estado de carga
-type Product = ReturnType<typeof getProductById>;
+export const dynamic = 'force-dynamic'
 
-export default function ProductoPage() {
-  const params = useParams()
-  const [product, setProduct] = useState<Product | null | undefined>(null);
+// 1. Actualizamos el tipo: params es ahora una Promise
+export default async function ProductoPage({ params }: { params: Promise<{ id: string }> }) {
+  
+  // 2. ¡ESPERAMOS! (await) a que se resuelvan los params
+  const { id } = await params
+  
+  // 3. Ahora ya tenemos el string "1", "2", etc. y podemos convertirlo
+  const productId = Number(id)
 
-  useEffect(() => {
-    // Obtenemos el ID de los params
-    const id = params.id
-    
-    if (id) {
-      const productId = Number(id)
-      const foundProduct = getProductById(productId)
-      setProduct(foundProduct)
-    }
-  }, [params.id]) // Se ejecuta cada vez que el ID de la URL cambia
+  const product = await getProductById(productId)
 
-  // 1. Mientras 'product' es null, estamos cargando
-  if (product === null) {
-    return <div style={{ color: 'white' }}>Cargando producto...</div>
+  if (!product) {
+    notFound()
   }
 
-  // 2. Si 'product' es undefined, no se encontró
-  if (product === undefined) {
-    notFound() // Muestra la página 404
-  }
+  //  1. OBTENEMOS LOS RELACIONADOS AQUÍ (En el servidor)
+  const relatedProducts = await getRelatedProducts(productId, product.category)
 
-  // 3. Si encontramos el producto, lo mostramos
-  return <ProductDetail product={product} />
+  //  2. SE LOS PASAMOS AL COMPONENTE COMO PROP
+  return <ProductDetail product={product} relatedProducts={relatedProducts} />
+
 }

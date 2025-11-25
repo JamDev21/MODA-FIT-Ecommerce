@@ -5,10 +5,10 @@ import { Search, ShoppingCart, User, Heart, Facebook, Instagram, Twitter, Messag
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import Link from "next/link";
-import { getProducts, Product } from "@/lib/products"
+// import { getProducts, Product } from "@/lib/products"
+import { Product } from "@/lib/types"
 
-export function ModaFitStore() {
-  const products = getProducts()
+export function ModaFitStore({ products }: { products: Product[] }) {
   const [cartCount, setCartCount] = useState(2)
 
   const handleAddToCart = (e: React.MouseEvent, productName: string) => {
