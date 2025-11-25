@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 
+
 // Función para EDITAR (PUT)
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

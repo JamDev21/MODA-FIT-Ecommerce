@@ -15,7 +15,7 @@ export type CartItem = {
 
 type CartContextType = {
   items: CartItem[]
-  addToCart: (product: any, size: string, color: string) => void
+  addToCart: (product: any, size: string, color: string, quantity?: number) => void
   removeFromCart: (id: number, size: string, color: string) => void
   clearCart: () => void
   cartTotal: number
@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted])
 
-  const addToCart = (product: any, size: string, color: string) => {
+  const addToCart = (product: any, size: string, color: string, quantity: number = 1) => {
     setItems((prev) => {
       // Buscamos si ya existe exactamente el mismo producto (mismo ID, talla y color)
       const existing = prev.find(
@@ -59,7 +59,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         toast.success("Cantidad actualizada en el carrito")
         return prev.map((item) =>
           item.id === product.id && item.size === size && item.color === color
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       }
@@ -72,7 +72,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           name: product.name,
           price: product.price,
           image: product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg",
-          quantity: 1,
+          quantity: quantity,
           size,
           color,
         },

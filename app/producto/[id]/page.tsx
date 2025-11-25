@@ -1,5 +1,5 @@
 import { getProductById, getRelatedProducts } from '@/lib/products'
-import { ProductDetail } from '@/components/product-detail'
+import ProductDetail from '@/components/product-detail'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
