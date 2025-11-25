@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
+import { CartProvider } from "@/lib/cart-context"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -30,9 +31,11 @@ export default function RootLayout({
         DENTRO de tus páginas (que es donde está el error).
       */}
       <body className={`${poppins.variable} font-sans antialiased`} suppressHydrationWarning>
+        <CartProvider>
         {children}
         <Toaster richColors />
         <Analytics />
+        </CartProvider>
       </body>
     </html>
   )

@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { toast } from 'sonner' 
 // import { Product, getRelatedProducts } from '@/lib/products' 
 import { Product } from '@/lib/types'
+import { useCart } from "@/lib/cart-context"
+import { CartSheet } from "@/components/cart-sheet"
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
@@ -19,6 +21,7 @@ interface ProductDetailProps {
 // Acepta 'product' como prop
 export function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   // Usa los datos del producto
+  const { addToCart } = useCart()
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'M')
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || 'default')
   const [selectedImage, setSelectedImage] = useState(0)
@@ -31,11 +34,9 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   // Obtén productos relacionados dinámicamente
 
   const handleAddToCart = () => {
-   const colorLabel = colors.find(c => c.name === selectedColor)?.label || ''
-    console.log('Añadido al carrito:', { selectedSize, selectedColor })
-    toast.success('Producto añadido al carrito', {
-      description: `Talla: ${selectedSize}, Color: ${colorLabel}`,
-    })
+    // Llamamos a la función del contexto global
+    // Le pasamos: el producto entero, la talla seleccionada y el color seleccionado
+    addToCart(product, selectedSize, selectedColor)
   }
 
   const handleAddToFavorites = () => {
@@ -53,6 +54,9 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               MODA <span className="text-[#f7b6c2]">FIT</span>
             </h1>
           </Link>
+          <div>
+            <CartSheet />
+          </div>
         </div>
       </header>
 

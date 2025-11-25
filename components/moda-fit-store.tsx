@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import Link from "next/link";
 import { Product } from "@/lib/types"
+import { useCart } from "@/lib/cart-context"
+import { CartSheet } from "@/components/cart-sheet"
 
 export function ModaFitStore({ products }: { products: Product[] }) {
-  const [cartCount, setCartCount] = useState(2)
+  const { addToCart } = useCart()
   
   // 1. Estados para filtros
   const [activeCategory, setActiveCategory] = useState<string>('all')
@@ -63,14 +65,17 @@ export function ModaFitStore({ products }: { products: Product[] }) {
     }
   };
 
-  const handleAddToCart = (e: React.MouseEvent, productName: string) => {
-    e.preventDefault() 
-    e.stopPropagation(); 
-    toast.success("Producto añadido", {
-      description: `${productName} se agregó al carrito.`,
-    })
-    setCartCount(prev => prev + 1)
-  }
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+  e.preventDefault()
+  e.stopPropagation()
+
+  // Como en la vista rápida no elegimos talla/color, mandamos default o el primero
+  const defaultSize = product.sizes?.[0] || "U"
+  const defaultColor = product.colors?.[0]?.name || "N/A"
+
+  addToCart(product, defaultSize, defaultColor)
+  // El toast ya lo maneja el context, puedes quitarlo de aquí si quieres
+}
 
   const toggleFavorite = (e: React.MouseEvent, productId: number) => {
     e.preventDefault() 
@@ -147,14 +152,8 @@ export function ModaFitStore({ products }: { products: Product[] }) {
               )}
             </div>
 
-            <button className="relative text-white hover:text-[#f7b6c2] transition-colors">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#f7b6c2] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            <CartSheet />
+          
             <button className="text-white hover:text-[#f7b6c2] transition-colors">
               <User className="h-5 w-5" />
             </button>
@@ -233,7 +232,7 @@ export function ModaFitStore({ products }: { products: Product[] }) {
                     <h3 className="font-semibold text-[#222] text-base line-clamp-1">{product.name}</h3>
                     <p className="text-xl font-bold text-[#222]">${product.price.toFixed(2)}</p>
                     <Button
-                      onClick={(e) => handleAddToCart(e, product.name)}
+                      onClick={(e) => handleAddToCart(e, product)}
                       className="w-full bg-[#222] hover:bg-[#222]/90 text-white font-medium py-2 transition-all hover:shadow-lg"
                     >
                       Añadir
