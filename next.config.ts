@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 👇 AÑADE ESTO
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '**', // Permite cualquier ruta dentro de Cloudinary
+      },
+    ],
+  },
+  
   typescript: {
     // !! ADVERTENCIA !!
     // Esto le dice a Next.js que NO falle el build si hay errores de TypeScript.
