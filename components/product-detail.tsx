@@ -57,7 +57,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           
           {/* Icono del carrito */}
           <div className="flex items-center">
-            <CartSheet />
+            <CartSheet className="text-[#222]" />
           </div>
         </div>
       </header>

@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useCart } from "@/lib/cart-context"
 import Image from "next/image"
 
-export function CartSheet() {
+export function CartSheet({ className = "text-white" }: { className?: string }) {
   const { items, removeFromCart, cartTotal, cartCount } = useCart()
 
   // 👇 LÓGICA PARA WHATSAPP
@@ -28,7 +28,7 @@ export function CartSheet() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <button className="relative text-white hover:text-[#f7b6c2] transition-colors">
+        <button className={`relative ${className} hover:text-[#f7b6c2] transition-colors`}>
           <ShoppingCart className="h-5 w-5" />
           {cartCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-[#f7b6c2] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
