@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation"
 import {
   LayoutGrid, Tag, ShoppingCart, Users, BarChart3, Settings,
   Plus, Download, Filter, Pencil, Trash2, Search, ShoppingBag, User, X, Upload, Check,
-  RefreshCcw, // Icono para cambiar el modo de categoría
-  LogOut
+  RefreshCcw, 
+  LogOut,
+  Palette // 👈 Icono para el color
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -54,17 +55,12 @@ export function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<number | null>(null)
   
-// Función para manejar el click en el menú
-  const handleNavClick = (itemName: string) => {
-    if (itemName === "Salir") {
-      router.push("/") // 👈 Redirige al inicio
-    } else {
-      setActiveNav(itemName) // 👈 Cambia la vista normal
-    }
-  }
-
   // Estado para controlar si estamos escribiendo una categoría nueva
   const [isCustomCategory, setIsCustomCategory] = useState(false);
+
+  // 👇 ESTADOS NUEVOS PARA AGREGAR COLOR
+  const [isAddingColor, setIsAddingColor] = useState(false);
+  const [newColor, setNewColor] = useState({ hex: "#000000", label: "" });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -80,12 +76,32 @@ export function AdminDashboard() {
   })
 
   // Calculamos las categorías disponibles dinámicamente
-  // (Combina las por defecto + las que ya existen en los productos descargados)
   const dynamicCategories = useMemo(() => {
     const existingCategories = products.map(p => p.category).filter(Boolean) as string[];
-    // Usamos Set para eliminar duplicados
     return Array.from(new Set([...DEFAULT_CATEGORIES, ...existingCategories]));
   }, [products]);
+
+  // 👇 LÓGICA NUEVA: Colores Dinámicos
+  // Combina los colores por defecto con los que tenga el producto actual (para no perderlos)
+  const dynamicColors = useMemo(() => {
+    const defaults = AVAILABLE_COLORS;
+    const current = formData.colors || [];
+    
+    // Creamos un mapa para evitar duplicados basados en el HEX
+    const colorMap = new Map();
+    defaults.forEach(c => colorMap.set(c.hex, c));
+    current.forEach(c => colorMap.set(c.hex, c)); // Los del producto tienen prioridad si existen
+    
+    return Array.from(colorMap.values());
+  }, [formData.colors]);
+
+  const handleNavClick = (itemName: string) => {
+    if (itemName === "Salir") {
+      router.push("/")
+    } else {
+      setActiveNav(itemName)
+    }
+  }
 
   const fetchProducts = async () => {
     try {
@@ -110,7 +126,8 @@ export function AdminDashboard() {
       name: "", description: "", care: "", sku: "", price: "", stock: "", 
       category: "Leggings", images: [], sizes: [], colors: []
     })
-    setIsCustomCategory(false) // Resetear modo categoría al limpiar
+    setIsCustomCategory(false)
+    setIsAddingColor(false) // Resetear modo color
   }
 
   const handleAddProduct = () => {
@@ -127,7 +144,6 @@ export function AdminDashboard() {
       sku: product.sku || "",
       price: (product.price || 0).toString(),
       stock: (product.stock || 0).toString(),
-      
       category: product.category || "Leggings",
       images: product.images || [],
       sizes: product.sizes || [],
@@ -136,6 +152,7 @@ export function AdminDashboard() {
     setEditingProduct(product.id)
     setIsModalOpen(true)
     setIsCustomCategory(false)
+    setIsAddingColor(false)
   }
 
   // Helpers para UI
@@ -150,19 +167,36 @@ export function AdminDashboard() {
 
   const toggleColor = (colorObj: any) => {
     setFormData(prev => {
-      const exists = prev.colors.some(c => c.name === colorObj.name);
+      const exists = prev.colors.some(c => c.hex === colorObj.hex); // Comparamos por HEX
       const newColors = exists
-        ? prev.colors.filter(c => c.name !== colorObj.name)
+        ? prev.colors.filter(c => c.hex !== colorObj.hex)
         : [...prev.colors, colorObj];
       return { ...prev, colors: newColors };
     });
   };
 
-  // Manejo inteligente del cambio de categoría
+  // 👇 LÓGICA NUEVA: Guardar el nuevo color personalizado
+  const handleSaveNewColor = () => {
+    if (!newColor.label || !newColor.hex) return;
+    
+    const colorObj = {
+        name: newColor.label.toLowerCase().replace(/\s+/g, '-'), // slug simple
+        label: newColor.label,
+        hex: newColor.hex
+    };
+
+    // Lo agregamos directamente a la selección del formulario
+    toggleColor(colorObj);
+    
+    // Limpiamos
+    setNewColor({ hex: "#000000", label: "" });
+    setIsAddingColor(false);
+  };
+
   const handleCategoryChange = (value: string) => {
     if (value === "new_custom_category") {
       setIsCustomCategory(true);
-      setFormData(prev => ({ ...prev, category: "" })); // Limpiar para que escriban
+      setFormData(prev => ({ ...prev, category: "" })); 
     } else {
       setFormData(prev => ({ ...prev, category: value }));
     }
@@ -247,7 +281,6 @@ export function AdminDashboard() {
               <Plus className="w-4 h-4 mr-2" /> Añadir Producto
             </Button>
           </div>
-
 
           <div className="bg-white rounded-lg shadow border overflow-hidden">
             <Table>
@@ -338,7 +371,7 @@ export function AdminDashboard() {
                       type="text" 
                       value={formData.category} 
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full border rounded-lg p-2.5 bg-blue-50 focus:ring-2 focus:ring-[#f7b6c2] outline-none placeholder:text-gray-400" 
+                      className="w-full border rounded-lg p-2.5 bg-blue-50 focus:ring-2 focus:ring-blue-300 outline-none placeholder:text-gray-400" 
                       placeholder="Nueva categoría..." 
                       autoFocus
                     />
@@ -397,14 +430,17 @@ export function AdminDashboard() {
                     ))}
                   </div>
                 </div>
+                
+                {/* 👇 MODIFICACIÓN: COLORES DINÁMICOS */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-3">Colores</label>
-                  <div className="flex flex-wrap gap-3">
-                    {AVAILABLE_COLORS.map((color) => {
-                      const isSelected = formData.colors.some(c => c.name === color.name);
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {/* Lista de colores (Dinámicos + Default) */}
+                    {dynamicColors.map((color) => {
+                      const isSelected = formData.colors.some(c => c.hex === color.hex);
                       return (
                         <button
-                          key={color.name}
+                          key={color.hex}
                           onClick={() => toggleColor(color)}
                           className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
                             isSelected 
@@ -414,12 +450,46 @@ export function AdminDashboard() {
                           style={{ backgroundColor: color.hex }}
                           title={color.label}
                         >
-                          {isSelected && <Check className={`w-4 h-4 ${color.name === 'blanco' ? 'text-black' : 'text-white'}`} />}
+                          {isSelected && <Check className={`w-4 h-4 ${['#ffffff', 'white'].includes(color.hex) ? 'text-black' : 'text-white'}`} />}
                         </button>
                       );
                     })}
+
+                    {/* Botón para agregar nuevo color */}
+                    {!isAddingColor ? (
+                        <button 
+                            onClick={() => setIsAddingColor(true)}
+                            className="w-9 h-9 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-500 transition-all"
+                            title="Agregar color personalizado"
+                        >
+                            <Plus className="w-5 h-5" />
+                        </button>
+                    ) : (
+                        // Mini formulario para agregar color
+                        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg border border-gray-200 animate-in fade-in slide-in-from-left-2">
+                            <input 
+                                type="color" 
+                                value={newColor.hex}
+                                onChange={(e) => setNewColor({...newColor, hex: e.target.value})}
+                                className="w-8 h-8 p-0 border-0 rounded cursor-pointer bg-transparent"
+                                title="Elige el color"
+                            />
+                            <input 
+                                type="text"
+                                value={newColor.label}
+                                onChange={(e) => setNewColor({...newColor, label: e.target.value})}
+                                placeholder="Nombre"
+                                className="w-20 text-xs p-1 border rounded outline-none focus:border-blue-400"
+                                autoFocus
+                            />
+                            <button onClick={handleSaveNewColor} className="text-green-600 hover:text-green-700"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setIsAddingColor(false)} className="text-red-500 hover:text-red-600"><X className="w-4 h-4" /></button>
+                        </div>
+                    )}
                   </div>
                 </div>
+                {/* 👆 FIN MODIFICACIÓN */}
+
               </div>
 
               {/* Texto */}
